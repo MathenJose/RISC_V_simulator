@@ -11,10 +11,9 @@
 // save the registers to binary file
 
 
-void main(){
+int main(){
 
     unsigned int memory [1000];
-    unsigned int * memory_pointer = &memory[0]; // pointer to the memory array
     for(int i = 0; i < 1000; i++){
         memory[i] = 0;
     }
@@ -25,7 +24,6 @@ void main(){
         registers[i] = 0;
     }
 
-    int counter;
     FILE *ptr_myfile;
 
     ptr_myfile=fopen("addpos.bin","rb");
@@ -40,9 +38,10 @@ void main(){
     // change memory pointer in the while loop
     while(fread(memory_pointer, sizeof(int), 1, ptr_myfile)){
         memory_pointer++; // go to next memory location
-        printf_s("%x \n",&memory_pointer);
+        printf_s("%x \n", *memory_pointer);
     }
     
     fclose(ptr_myfile);
 
+	return 0;
 }
