@@ -23,20 +23,22 @@ void dec2bin(int c)
 
 int main(){
 
+    char file_path[] = "addpos.bin";
+
     unsigned int memory [1000];
     for(int i = 0; i < 1000; i++){ // clear the memory
         memory[i] = 0;
     }
     unsigned int * memory_pointer = &memory[0]; // pointer to the memory array
 
-    unsigned int registers [32];
+    unsigned int reg [32];
     for(int i = 0; i < 32; i++){ // clear the memory
-        registers[i] = 0;
+        reg[i] = 0;
     }
 
     FILE *ptr_myfile;
 
-    ptr_myfile=fopen("shift.bin","rb");
+    ptr_myfile=fopen(file_path,"rb");
     if (!ptr_myfile){
         printf("Unable to open file!");
         return 1;
@@ -51,18 +53,31 @@ int main(){
         dec2bin(*memory_pointer);
         printf("\n");
         word_counter++;
+        memory_pointer++;
     }
     fclose(ptr_myfile);
-    printf("Read %i words from the input file. \n", word_counter);
+    printf("Read %d words from the input file. \n", word_counter);
 
     // RUNNING THE SIMULATOR
 
     int pc = 0; // set pc to zero to start
-    while(true){
-        printf("Starting simulation... \n");
 
+    printf("Starting simulation... \n");
+    while(pc < word_counter){
 
-        pc ++
+        // decoding:
+        unsigned int instr = memory[pc];
+        unsigned int opcode = instr & 0x7f;
+        unsigned int rd = (instr >> 7) & 0x1f;// 7bit shift to right and clears everything except for first 5 digits
+        unsigned int rs1 = (instr >> 15) & 0x1f;
+		unsigned int rs2 = (instr >> 20) & 0x1f;
+		unsigned int funct3 = (instr>> 12) & 0x7;
+		unsigned int funct7 = (instr>> 23);
+		unsigned int imm_25_31 = (instr>> 25);
+		unsigned int imm_20_31 = (instr >> 20);
+		unsigned int imm_12_31 =(instr >> 12);
+
+        pc ++;
     }
 
 	return 0;
