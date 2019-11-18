@@ -1,5 +1,5 @@
 #include<stdio.h>
-// simulator for RISC-V 
+// simulator for RISC-V
 
 // take input from binary file
 // save it to memory
@@ -9,7 +9,17 @@
 // run each instruction
 
 // save the registers to binary file
-
+void dec2bin(int c)
+{
+   int i = 0;
+   for(i = 31; i >= 0; i--){
+     if((c & (1 << i)) != 0){
+       printf("1");
+     }else{
+       printf("0");
+     }
+   }
+}
 
 int main(){
 
@@ -18,8 +28,8 @@ int main(){
         memory[i] = 0;
     }
     unsigned int * memory_pointer = &memory[0]; // pointer to the memory array
-    
-    unsigned int registers [32]; 
+
+    unsigned int registers [32];
     for(int i = 0; i < 32; i++){
         registers[i] = 0;
     }
@@ -33,14 +43,14 @@ int main(){
     }
 
     /* Seek to the beginning of the file */
-   fseek(ptr_myfile, 0, SEEK_SET);
+    fseek(ptr_myfile, 0, SEEK_SET);
 
     // change memory pointer in the while loop
     while(fread(memory_pointer, sizeof(int), 1, ptr_myfile)){
-        memory_pointer++; // go to next memory location
-        printf_s("%x \n", *memory_pointer);
+        dec2bin(*memory_pointer);
+        printf("\n");
     }
-    
+
     fclose(ptr_myfile);
 
 	return 0;
