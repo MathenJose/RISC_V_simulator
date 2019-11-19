@@ -115,7 +115,7 @@ int main(){
 						break;
 					case 001://***************
 						//slli-shifr left logical immediate
-						reg[rd]=reg[rs1] << rs2;
+						reg[rd]=reg[rs1] << imm_20_31_s;
 						break;
 					case 010:
 						//slti-set less than immediate
@@ -138,7 +138,7 @@ int main(){
 						break;
 					case 100:
 						//xori
-						reg[rd]=reg[rs1]^imm_20_31;
+						reg[rd]=reg[rs1]^imm_20_31_s;
 
 					case 101://******************
 						//srli and srai- shift right logical and arithmetic immediate
