@@ -183,7 +183,7 @@ int main(){
 
 						if(funct7==0b0100000){ //arithmetic
                         printf("srai \n");
-
+						//check srai
 						reg[rd]=reg[rs1]>>rs2; // rs2 = shamt
 						x=reg[rs1]&0x80000000;
 						reg[rd]=reg[rs1]>>reg[rs2];
