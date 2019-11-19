@@ -283,6 +283,7 @@ int main(){
 
 			case 0x37://lui	110111
 				printf("lui inst \n");
+				imm_12_31=imm_12_31_s&0xfffff000;
 				reg[rd] = imm_12_31;
 				break;
 
