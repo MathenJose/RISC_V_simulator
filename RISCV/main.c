@@ -31,7 +31,7 @@ int main(){
     }
     unsigned int * memory_pointer = &memory[0]; // pointer to the memory array
 
-    unsigned int reg [32];
+    int reg [32];
     for(int i = 0; i < 32; i++){ // clear the memory
         reg[i] = 0;
     }
@@ -78,16 +78,19 @@ int main(){
 	unsigned int imm_12_31 =(instr >> 12);
 
         pc ++;
-    }
+    
 	
 			switch (opcode) {
-			
+			int imm_12_31_s =(instr >> 12);//signed imeediate
+			int imm_25_31_s = (instr>> 25);
+			int imm_20_31_s (instr >> 20);
 			case 0x73: // e-call
 				funct3=000;
 				break;	
 				
 			case 0x23: //load and store 0100011
-				reg[rd] = reg[rs1] + imm_12_31;
+				
+				reg[rd_s] = reg[rs1] + imm_12_31_s;
 				break;
 				
 			case 0x13: //instructions with immediate 0010011
@@ -98,8 +101,8 @@ int main(){
 				 		//System.out.println(rd);
 				 		//System.out.println(rs1);
 						//immediate can be signed
-						int imm_12_31 =(instr >> 12);
-						reg[rd]=reg[rs1]+imm_20_31;
+						
+						reg[rd]=reg[rs1]+imm_20_31_s;
 						break;
 					case 001://***************
 						//slli-shifr left logical immediate
@@ -107,7 +110,7 @@ int main(){
 						break;	
 					case 010:
 						//slti-set less than immediate
-						if(reg[rs1]<imm_20_31){
+						if(reg[rs1]<imm_20_31_s
 						reg[rd] = 1;
 						}
 						else{
