@@ -20,6 +20,7 @@ void dec2bin(int c){
    }
 }
 
+// prints all the register values
 void printReg(int reg[]){
     for(int i = 0; i < 32; i++){
         printf("%d ", reg[i]);
@@ -27,9 +28,23 @@ void printReg(int reg[]){
     printf("\n");
 }
 
+// these functions convert from binary 2'compliment to decimal
+int twoComp2Dec_20(int a){
+    return (0x80000&a ? (int)(0x7FFFF&a)-0x80000 : a);
+}
+
+int twoComp2Dec_7(int a){
+    return (0x40&a ? (int)(0x3F&a)-0x40 : a);
+}
+
+int twoComp2Dec_12(int a){
+    return (0x800&a ? (int)(0x7FF&a)-0x800 : a);
+}
+
 int main(){
 
-    char file_path[] = "addneg.bin";
+    char file_path[] = "addlarge.bin";
+    printf("Test file: %s \n", file_path);
 
     unsigned int memory [1000];
     for(int i = 0; i < 1000; i++){ // clear the memory
@@ -82,13 +97,12 @@ int main(){
         unsigned int imm_25_31 = (instr>> 25);
         unsigned int imm_20_31 = (instr >> 20);
         unsigned int imm_12_31 = (instr >> 12);
-	unsigned int x=0;    
+        unsigned int x = 0;
 
         // signed versions of the immediate
-        int imm_12_31_s =(instr >> 12);//signed immediate
-		int imm_25_31_s = (instr>> 25);
-        int imm_20_31_s = (instr >> 20);
-	    
+        int imm_12_31_s = twoComp2Dec_20(imm_12_31);//signed immediate
+		int imm_25_31_s = twoComp2Dec_7(imm_25_31);
+        int imm_20_31_s = twoComp2Dec_12(imm_20_31);
 
         pc ++;
 
@@ -226,13 +240,12 @@ int main(){
 						//sra-should be signed
 						if(funct7 == 0b0100000){
 							if(reg[rs1]>0){
-							reg[rd]=reg[rs1]>>reg[rs2];
+                                reg[rd]=reg[rs1]>>reg[rs2];
 							}
 							else{
-							
-								unsigned int x=reg[rs1]&0x80000000;
+								x=reg[rs1]&0x80000000;
 								reg[rd]=reg[rs1]>>reg[rs2];
-								
+
 								reg[rd]=reg[rd]|x;
 							}
 						}
