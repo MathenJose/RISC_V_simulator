@@ -84,6 +84,192 @@ int main(){
         unsigned int imm_12_31 = (instr >> 12);
 
         pc ++;
+    
+	
+			switch (opcode) {
+			int imm_12_31_s =(instr >> 12);//signed imeediate
+			int imm_25_31_s = (instr>> 25);
+			int imm_20_31_s (instr >> 20);
+			case 0x73: // e-call
+				funct3=000;
+				break;	
+				
+			case 0x23: //load and store 0100011
+				
+				reg[rd_s] = reg[rs1] + imm_12_31_s;
+				break;
+				
+			case 0x13: //instructions with immediate 0010011
+				switch(funct3){
+				 	case 000:
+						//addi
+				 		//System.out.println("addi");
+				 		//System.out.println(rd);
+				 		//System.out.println(rs1);
+						//immediate can be signed
+						
+						reg[rd]=reg[rs1]+imm_20_31_s;
+						break;
+					case 001://***************
+						//slli-shifr left logical immediate
+						reg[rd]=reg[rs1] << rs2;
+						break;	
+					case 010:
+						//slti-set less than immediate
+						if(reg[rs1]<imm_20_31_s
+						reg[rd] = 1;
+						}
+						else{
+							reg[rd] = 0;
+						}
+						break;
+					case 011:
+						//sltiu-set less than immediate unsigned
+						//*****************
+						if(reg[rs1]>imm_20_31){
+						reg[rd] = 1;
+						}
+						else{
+							reg[rd] = 0;
+						}
+						break;	
+					case 100:
+						//xori
+						reg[rd]=reg[rs1]^imm_20_31;
+						
+					case 101://******************
+						//srli and srai- shift right logical and arithmetic immediate
+						//SHAMPT as rs2
+						if(funct7==0b0000000){
+					
+						reg[rd]=reg[rs1]<<rs2;
+						}
+						   //arithmetic
+						if(funct7==0b0100000){
+						reg[rd]=reg[rs1]>>rs2;
+						}
+						break;
+					case 110:
+						//ori
+						reg[rd]=reg[rs1]|imm_20_31_s;
+							
+					case 111:
+						//andi
+						reg[rd]=reg[rs1]&imm_20_31_s;
+				}
+				break;
+				
+			case 0x33: // 0110011
+				switch(funct3){
+					case 000://
+						//add
+						System.out.println("add");
+						if(funct7==0b0000000){
+							//add
+							reg[rd]=reg[rs1]+reg[rs2];
+						}
+						if(funct7==0b0100000){
+						//sub
+							reg[rd]=reg[rs1]-reg[rs2];
+						}
+						break;
+					case 001:
+						//sll
+						//shift left logical-unsigned
+						reg[rd]=reg[rs1]<<reg[rs2]; // FIX 
+						break;	
+					case 010:
+						//slt-set less than. slt rd, rs1, rs2.
+						//rd is 1 if rs1<rs2
+						if(reg[rs1]<reg[rs2]){
+						reg[rd] = 1;
+						}
+						else{
+							reg[rd] = 0;
+						}
+						break;
+					case 011:
+						//sltu-unsigned
+						//*****************
+						
+						if(reg[rs1]<reg[rs2]){
+						reg[rd] = 1;
+						}
+						else{
+							reg[rd] = 0;
+						}
+						break;
+					case 100:
+						//xor
+						reg[rd]=reg[rs1]^reg[rs2];
+						break;	
+							
+					case 101://**************
+						//srl and  sra
+						//rs2 = getSigned(rs2);
+							
+						if(funct7 == 0b0000000){
+						//srl-logical-unsigned
+						reg[rd]=reg[rs1]>>reg[rs2];
+						}
+						//sra-should be signed
+						if(funct7 == 0b0100000){
+						
+						reg[rd]=reg[rs1]>>reg[rs2];
+						}
+						break;
+					case 110:
+						//or
+						reg[rd]=reg[rs1]|reg[rs2];
+						break;
+					case 111:
+						//and
+						reg[rd]=reg[rs1]&reg[rs2];
+						break;
+				}
+				break;
+				
+			case 0x43: // 1000011
+				switch(funct3){
+				 	case 000:
+						//SB
+						break;
+					case 001://***************
+						//SH	
+						break;	
+					case 010:
+						//SW
+						break;
+				}
+				break;
+			
+			
+			case 0x37://lui	110111
+				System.out.println("lui inst");
+				reg[rd] = imm_12_31;	
+				break;
+				
+			default:
+				System.out.println("Opcode " + opcode + " not yet implemented");
+				break;
+		}
+			
+			
+			if(opcode==0x43){ // TO DO
+				switch(funct3){
+				 	case 000:
+						//SB
+						break;
+					case 001://***************
+						//SH	
+						break;	
+					case 010:
+						//SW
+						break;
+				}
+			}
+			
+				
 
 
         switch (opcode) {
