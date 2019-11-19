@@ -29,7 +29,7 @@ void printReg(int reg[]){
 
 int main(){
 
-    char file_path[] = "addpos.bin";
+    char file_path[] = "addneg.bin";
 
     unsigned int memory [1000];
     for(int i = 0; i < 1000; i++){ // clear the memory
@@ -78,7 +78,7 @@ int main(){
         unsigned int rs1 = (instr >> 15) & 0x1f;
         unsigned int rs2 = (instr >> 20) & 0x1f;
         unsigned int funct3 = (instr>> 12) & 0x7;
-        unsigned int funct7 = (instr>> 23);
+        unsigned int funct7 = (instr>> 25);
         unsigned int imm_25_31 = (instr>> 25);
         unsigned int imm_20_31 = (instr >> 20);
         unsigned int imm_12_31 = (instr >> 12);
@@ -99,17 +99,16 @@ int main(){
 
 			case 0x23: //load and store 0100011
 
-				reg[rd] = reg[rs1] + imm_12_31_s;
+				// TODO
 				break;
 
 			case 0x13: //instructions with immediate 0010011
 				switch(funct3){
 				 	case 000:
 						//addi
-				 		//System.out.println("addi");
-				 		//System.out.println(rd);
-				 		//System.out.println(rs1);
 						//immediate can be signed
+                        printf("addi \n");
+                        printf("imm = : %d \n", imm_12_31_s);
 
 						reg[rd]=reg[rs1]+imm_20_31_s;
 						break;
@@ -167,6 +166,9 @@ int main(){
 					case 000://
 						//add
 						printf("add \n");
+						printf("funct7 %d \n", funct7);
+						dec2bin(funct7);
+						printf("\n");
 						if(funct7==0b0000000){
 							//add
 							reg[rd]=reg[rs1]+reg[rs2];
