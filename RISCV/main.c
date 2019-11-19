@@ -124,8 +124,9 @@ int main(){
 				break;
 
 			case 0x13: //instructions with immediate 0010011
+			    printf("opdcode 13 printing funct3 %d \n", funct3);
 				switch(funct3){
-				 	case 000:
+				 	case 0b000:
 						//addi
 						//immediate can be signed
                         printf("addi \n");
@@ -137,12 +138,13 @@ int main(){
 
 						reg[rd]=reg[rs1]+imm_20_31_s;
 						break;
-					case 001://***************
-						//slli-shifr left logical immediate
-						reg[rd]=reg[rs1] << imm_20_31_s;
+					case 0b001://***************
+						//slli- shift left logical immediate
+						printf("slli \n");
+						reg[rd]=reg[rs1] << rs2; // rs2 = shamt
 						break;
-					case 010:
-						//slti-set less than immediate
+					case 0b010:
+						//slti- set less than immediate
 						if(reg[rs1]<imm_20_31_s){
                             reg[rd] = 1;
 						}
@@ -150,7 +152,7 @@ int main(){
 							reg[rd] = 0;
 						}
 						break;
-					case 011:
+					case 0b011:
 						//sltiu-set less than immediate unsigned
 						//*****************
 						if(reg[rs1]>imm_20_31){
@@ -160,30 +162,48 @@ int main(){
 							reg[rd] = 0;
 						}
 						break;
-					case 100:
+					case 0b100:
 						//xori
 						reg[rd]=reg[rs1]^imm_20_31_s;
 
-					case 101://******************
+					case 0b101://******************
 						//srli and srai- shift right logical and arithmetic immediate
-
+                        printf("sr__ \n");
 						//SHAMPT as rs2
 						if(funct7==0b0000000){ // logical
+                        printf("srli \n");
 
 						reg[rd]=reg[rs1]<<rs2; // rs2 = shamt
+
+						dec2bin(reg[rs1]);
+                        printf("\n");
+                        dec2bin(reg[rd]);
+                        printf("\n");
 						}
 
 						if(funct7==0b0100000){ //arithmetic
+                        printf("srai \n");
+
 						reg[rd]=reg[rs1]>>rs2; // rs2 = shamt
+
+						dec2bin(reg[rs1]);
+                        printf("\n");
+                        dec2bin(reg[rd]);
+                        printf("\n");
 						}
 						break;
-					case 110:
+					case 0b110:
 						//ori
 						reg[rd]=reg[rs1]|imm_20_31_s;
 
-					case 111:
+					case 0b111:
 						//andi
 						reg[rd]=reg[rs1]&imm_20_31_s;
+                    default:
+                        printf("ERROR: funct3 not recognised.\n");
+                        printf("funct3: ");
+                        dec2bin(funct3);
+                        printf("\n");
 				}
 				break;
 
