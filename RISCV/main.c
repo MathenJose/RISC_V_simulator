@@ -185,7 +185,9 @@ int main(){
                         printf("srai \n");
 
 						reg[rd]=reg[rs1]>>rs2; // rs2 = shamt
-
+						x=reg[rs1]&0x80000000;
+						reg[rd]=reg[rs1]>>reg[rs2];
+						reg[rd]=reg[rd]|x;
 						dec2bin(reg[rs1]);
                         printf("\n");
                         dec2bin(reg[rd]);
