@@ -138,17 +138,18 @@ int main(){
 					
 						reg[rd]=reg[rs1]<<rs2;
 						}
+						   //arithmetic
 						if(funct7==0b0100000){
 						reg[rd]=reg[rs1]>>rs2;
 						}
 						break;
 					case 110:
 						//ori
-						reg[rd]=reg[rs1]|imm_20_31;
+						reg[rd]=reg[rs1]|imm_20_31_s;
 							
 					case 111:
 						//andi
-						reg[rd]=reg[rs1]&imm_20_31;
+						reg[rd]=reg[rs1]&imm_20_31_s;
 				}
 				break;
 				
