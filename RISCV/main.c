@@ -43,7 +43,7 @@ int twoComp2Dec_12(int a){
 
 int main(){
 
-    char file_path[] = "addlarge.bin";
+    char file_path[] = "shift.bin";
     printf("Test file: %s \n", file_path);
 
     unsigned int memory [1000];
@@ -114,7 +114,7 @@ int main(){
 				if (reg[10] = 10){
                     // exits program
                     printf("Exiting through ecall...");
-                    return 0; // exit main funciton
+                    return 0; // exit main function
 				}
 				break;
 
@@ -166,14 +166,15 @@ int main(){
 
 					case 101://******************
 						//srli and srai- shift right logical and arithmetic immediate
-						//SHAMPT as rs2
-						if(funct7==0b0000000){
 
-						reg[rd]=reg[rs1]<<rs2;
+						//SHAMPT as rs2
+						if(funct7==0b0000000){ // logical
+
+						reg[rd]=reg[rs1]<<rs2; // rs2 = shamt
 						}
-						   //arithmetic
-						if(funct7==0b0100000){
-						reg[rd]=reg[rs1]>>rs2;
+
+						if(funct7==0b0100000){ //arithmetic
+						reg[rd]=reg[rs1]>>rs2; // rs2 = shamt
 						}
 						break;
 					case 110:
@@ -283,8 +284,7 @@ int main(){
 
 			case 0x37://lui	110111
 				printf("lui inst \n");
-				imm_12_31=imm_12_31_s&0xfffff000;
-				reg[rd] = imm_12_31;
+				reg[rd] = imm_12_31 << 12;
 				break;
 
 			default:
