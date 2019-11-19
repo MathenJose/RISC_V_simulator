@@ -110,7 +110,12 @@ int main(){
         switch (opcode) {
 
 			case 0x73: // e-call
-				funct3=000;
+				// exit:
+				if (reg[10] = 10){
+                    // exits program
+                    printf("Exiting through ecall...");
+                    return 0; // exit main funciton
+				}
 				break;
 
 			case 0x23: //load and store 0100011
