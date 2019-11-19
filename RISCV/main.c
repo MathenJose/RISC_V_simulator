@@ -70,16 +70,12 @@ int main(){
         unsigned int opcode = instr & 0x7f;
         unsigned int rd = (instr >> 7) & 0x1f;// 7bit shift to right and clears everything except for first 5 digits
        	unsigned int rs1 = (instr >> 15) & 0x1f;
-	    int rs1_s = (instr >> 15) & 0x1f;
 	unsigned int rs2 = (instr >> 20) & 0x1f;
-	   //signed int reg2
-	    int rs2_s = (instr >> 20) & 0x1f;
 	unsigned int funct3 = (instr>> 12) & 0x7;
 	unsigned int funct7 = (instr>> 23);
 	unsigned int imm_25_31 = (instr>> 25);
 	unsigned int imm_20_31 = (instr >> 20);
 	unsigned int imm_12_31 =(instr >> 12);
-	     int imm_12_31_s =(instr >> 12);
 
         pc ++;
     }
@@ -102,15 +98,16 @@ int main(){
 				 		//System.out.println(rd);
 				 		//System.out.println(rs1);
 						//immediate can be signed
-						reg[rd]=reg[rs1_s]+imm_20_31_s;
+						int imm_12_31 =(instr >> 12);
+						reg[rd]=reg[rs1]+imm_20_31;
 						break;
 					case 001://***************
 						//slli-shifr left logical immediate
-						reg[rd]=reg[rs1_s] << rs2;
+						reg[rd]=reg[rs1] << rs2;
 						break;	
 					case 010:
 						//slti-set less than immediate
-						if(reg[rs1_s]<imm_20_31_s){
+						if(reg[rs1]<imm_20_31){
 						reg[rd] = 1;
 						}
 						else{
@@ -120,8 +117,7 @@ int main(){
 					case 011:
 						//sltiu-set less than immediate unsigned
 						//*****************
-						imm_20_31 = getSigned(imm_20_31);
-						if(reg[rs1_s]>imm_20_31){
+						if(reg[rs1]>imm_20_31){
 						reg[rd] = 1;
 						}
 						else{
@@ -175,7 +171,7 @@ int main(){
 					case 010:
 						//slt-set less than. slt rd, rs1, rs2.
 						//rd is 1 if rs1<rs2
-						if(reg[rs1_s]<reg[rs2_s]){
+						if(reg[rs1]<reg[rs2]){
 						reg[rd] = 1;
 						}
 						else{
@@ -209,7 +205,7 @@ int main(){
 						//sra-should be signed
 						if(funct7 == 0b0100000){
 						
-						reg[rd]=reg[rs1]>>reg[rs2_s];
+						reg[rd]=reg[rs1]>>reg[rs2];
 						}
 						break;
 					case 110:
