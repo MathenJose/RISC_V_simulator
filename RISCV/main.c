@@ -82,11 +82,13 @@ int main(){
         unsigned int imm_25_31 = (instr>> 25);
         unsigned int imm_20_31 = (instr >> 20);
         unsigned int imm_12_31 = (instr >> 12);
+	unsigned int x=0;    
 
         // signed versions of the immediate
         int imm_12_31_s =(instr >> 12);//signed immediate
 		int imm_25_31_s = (instr>> 25);
         int imm_20_31_s = (instr >> 20);
+	    
 
         pc ++;
 
@@ -223,8 +225,16 @@ int main(){
 						}
 						//sra-should be signed
 						if(funct7 == 0b0100000){
-
-						reg[rd]=reg[rs1]>>reg[rs2];
+							if(reg[rs1]>0){
+							reg[rd]=reg[rs1]>>reg[rs2];
+							}
+							else{
+							
+								unsigned int x=reg[rs1]&0x80000000;
+								reg[rd]=reg[rs1]>>reg[rs2];
+								
+								reg[rd]=reg[rd]|x;
+							}
 						}
 						break;
 					case 110:
