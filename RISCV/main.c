@@ -74,9 +74,9 @@ int main(){
     // decoding:
         unsigned int instr = memory[pc];
         unsigned int opcode = instr & 0x7f;
-        unsigned int rd = (instr >> 7) & 0x1f;
-        unsigned int rs1 = (instr >> 15) & 0x1f;
-        unsigned int rs2 = (instr >> 20) & 0x1f;
+        int rd = (instr >> 7) & 0x1f;
+        int rs1 = (instr >> 15) & 0x1f;
+        int rs2 = (instr >> 20) & 0x1f;
         unsigned int funct3 = (instr>> 12) & 0x7;
         unsigned int funct7 = (instr>> 25);
         unsigned int imm_25_31 = (instr>> 25);
@@ -84,7 +84,7 @@ int main(){
         unsigned int imm_12_31 = (instr >> 12);
 
         // signed versions of the immediate
-        int imm_12_31_s =(instr >> 12);//signed imeediate
+        int imm_12_31_s =(instr >> 12);//signed immediate
 		int imm_25_31_s = (instr>> 25);
         int imm_20_31_s = (instr >> 20);
 
@@ -108,7 +108,11 @@ int main(){
 						//addi
 						//immediate can be signed
                         printf("addi \n");
-                        printf("imm = : %d \n", imm_12_31_s);
+                        printf("imm = : %d \n", imm_20_31_s);
+                        dec2bin(imm_20_31_s);
+                        printf("\n");
+                        dec2bin(imm_20_31);
+                        printf("\n");
 
 						reg[rd]=reg[rs1]+imm_20_31_s;
 						break;
