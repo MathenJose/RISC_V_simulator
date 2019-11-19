@@ -78,7 +78,7 @@ int main(){
         unsigned int rs1 = (instr >> 15) & 0x1f;
         unsigned int rs2 = (instr >> 20) & 0x1f;
         unsigned int funct3 = (instr>> 12) & 0x7;
-        unsigned int funct7 = (instr>> 23);
+        unsigned int funct7 = (instr>> 25);
         unsigned int imm_25_31 = (instr>> 25);
         unsigned int imm_20_31 = (instr >> 20);
         unsigned int imm_12_31 = (instr >> 12);
