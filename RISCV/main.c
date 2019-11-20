@@ -127,7 +127,6 @@ int main(){
 				break;
 
 			case 0x13: //instructions with immediate 0010011
-			    printf("opdcode 13 printing funct3 %d \n", funct3);
 				switch(funct3){
 				 	case 0b000:
 						//addi
@@ -296,6 +295,16 @@ int main(){
 
             case 0x63: // branch 1100011
                 printf("branch \n");
+                // work out offset here
+                unsigned int imm11 = (instr >> 7) & 0x1; // 1 bit
+                unsigned int imm4_1 = (instr >> 8) & 0xF; // 4 bits
+                unsigned int imm10_5 = (instr >> 25) & 0x3F; // 6 bits
+                unsigned int imm12 = (instr >> 31) & 0x1; // 1 bit
+
+                int offset = 0b0 + (imm4_1 << 1) + (imm10_5 << 5) + (imm11 << 11) + (imm12 << 12);
+
+                printf("Offset: %d \n", offset);
+
                 switch(funct3){
 				 	case 0b000: //BEQ
 				 	    printf("BEQ \n");
