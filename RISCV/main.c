@@ -311,16 +311,28 @@ int main(){
 						break;
 					case 0b100: // BLT
 					    printf("BLT \n");
+					    if(reg[rs1] < reg[rs2]){
+                            // take branch
+				 	    }
 						break;
                     case 0b101: // BGE
                         printf("BGE \n");
+                        if(reg[rs1] >= reg[rs2]){
+                            // take branch
+				 	    }
 						break;
                     case 0b110: // BLTU
                         printf("BLTU \n");
+                        if( (unsigned) reg[rs1] < (unsigned) reg[rs2]){
+                            // take branch
+				 	    }
 						break;
                     case 0b111: // BGEU
                         printf("BGEU \n");
 						break;
+						if( (unsigned) reg[rs1] >= (unsigned) reg[rs2]){
+                            // take branch
+				 	    }
 				}
 				break;
 
