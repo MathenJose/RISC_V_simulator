@@ -1,4 +1,5 @@
 #include<stdio.h>
+
 // simulator for RISC-V
 
 // take input from binary file
@@ -9,6 +10,8 @@
 // run each instruction
 
 // save the registers to binary file
+
+
 void dec2bin(int c){
    int i = 0;
    for(i = 31; i >= 0; i--){
@@ -43,7 +46,7 @@ int twoComp2Dec_12(int a){
 
 int main(){
 
-    char file_path[] = "shift.bin";
+    char file_path[] = "branchmany.bin";
     printf("Test file: %s \n", file_path);
 
     unsigned int memory [1000];
@@ -111,7 +114,7 @@ int main(){
 
 			case 0x73: // e-call
 				// exit:
-				if (reg[10] = 10){
+				if (reg[10] == 10){
                     // exits program
                     printf("Exiting through ecall...");
                     return 0; // exit main function
@@ -175,7 +178,7 @@ int main(){
 
 						reg[rd]=reg[rs1]<<rs2; // rs2 = shamt
 
-						dec2bin(reg[rs1]);
+						dec2bin(reg[rs1]); // debug
                         printf("\n");
                         dec2bin(reg[rd]);
                         printf("\n");
@@ -183,11 +186,12 @@ int main(){
 
 						if(funct7==0b0100000){ //arithmetic
                         printf("srai \n");
-						//check srai
+						//check srai (Mathen: this might require a loop for repeatedly shifting by 1)
 						reg[rd]=reg[rs1]>>rs2; // rs2 = shamt
 						x=reg[rs1]&0x80000000;
 						reg[rd]=reg[rs1]>>reg[rs2];
 						reg[rd]=reg[rd]|x;
+
 						dec2bin(reg[rs1]);
                         printf("\n");
                         dec2bin(reg[rd]);
@@ -202,16 +206,13 @@ int main(){
 						//andi
 						reg[rd]=reg[rs1]&imm_20_31_s;
                     default:
-                        printf("ERROR: funct3 not recognised.\n");
-                        printf("funct3: ");
-                        dec2bin(funct3);
-                        printf("\n");
+                        printf("ERROR funct3 not recognised... \n");
 				}
 				break;
 
 			case 0x33: // 0110011
 				switch(funct3){
-					case 000://
+					case 0b000://
 						//add
 						printf("add \n");
 						printf("funct7 %d \n", funct7);
@@ -226,12 +227,12 @@ int main(){
 							reg[rd]=reg[rs1]-reg[rs2];
 						}
 						break;
-					case 001:
+					case 0b001:
 						//sll
 						//shift left logical-unsigned
 						reg[rd]=reg[rs1]<<reg[rs2]; // FIX
 						break;
-					case 010:
+					case 0b010:
 						//slt-set less than. slt rd, rs1, rs2.
 						//rd is 1 if rs1<rs2
 						if(reg[rs1]<reg[rs2]){
@@ -241,7 +242,7 @@ int main(){
 							reg[rd] = 0;
 						}
 						break;
-					case 011:
+					case 0b011:
 						//sltu-unsigned
 						//*****************
 
@@ -252,14 +253,13 @@ int main(){
 							reg[rd] = 0;
 						}
 						break;
-					case 100:
+					case 0b100:
 						//xor
 						reg[rd]=reg[rs1]^reg[rs2];
 						break;
 
-					case 101://**************
+					case 0b101:
 						//srl and  sra
-						//rs2 = getSigned(rs2);
 
 						if(funct7 == 0b0000000){
 						//srl-logical-unsigned
@@ -278,55 +278,55 @@ int main(){
 							}
 						}
 						break;
-					case 110:
+					case 0b110:
 						//or
 						reg[rd]=reg[rs1]|reg[rs2];
 						break;
-					case 111:
+					case 0b111:
 						//and
 						reg[rd]=reg[rs1]&reg[rs2];
 						break;
 				}
 				break;
 
-			case 0x43: // 1000011
-				switch(funct3){
-				 	case 000:
-						//SB
-						break;
-					case 001://***************
-						//SH
-						break;
-					case 010:
-						//SW
-						break;
-				}
-				break;
-
-
 			case 0x37://lui	110111
 				printf("lui inst \n");
 				reg[rd] = imm_12_31 << 12;
 				break;
 
+            case 0x63: // branch 1100011
+                printf("branch \n");
+                switch(funct3){
+				 	case 0b000: //BEQ
+				 	    printf("BEQ \n");
+				 	    if(reg[rs1] == reg[rs2]){
+                            // take branch
+				 	    }
+						break;
+					case 0b001: // BNE
+					    printf("BNE \n");
+					    if(reg[rs1] != reg[rs2]){
+                            // take branch
+				 	    }
+						break;
+					case 0b100: // BLT
+					    printf("BLT \n");
+						break;
+                    case 0b101: // BGE
+                        printf("BGE \n");
+						break;
+                    case 0b110: // BLTU
+                        printf("BLTU \n");
+						break;
+                    case 0b111: // BGEU
+                        printf("BGEU \n");
+						break;
+				}
+				break;
+
 			default:
-				printf("Opcode %d not yet implemented", opcode);
+				printf("Opcode %d not yet implemented \n", opcode);
 		}
-
-
-        if(opcode==0x43){ // TO DO
-            switch(funct3){
-                case 000:
-                    //SB
-                    break;
-                case 001://***************
-                    //SH
-                    break;
-                case 010:
-                    //SW
-                    break;
-            }
-        }
 
 
     printReg(reg);
