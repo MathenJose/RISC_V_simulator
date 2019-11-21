@@ -11,6 +11,14 @@
 
 // save the registers to binary file
 
+int branch(int pc, int offset){
+    printf("branching...\n");
+    pc--; // undo the increment (do not go to the next instruction)
+    printf("pc: %d to pc %d \n", pc, pc+offset);
+    pc = pc + offset; // change the pc by the offset
+
+    return pc;
+}
 
 void dec2bin(int c){
    int i = 0;
@@ -88,6 +96,7 @@ int main(){
 
     printf("Starting simulation... \n");
     while(pc < word_counter){
+        printf("Start of instruction. pc: %d.\n",pc);
 
     // decoding:
         unsigned int instr = memory[pc];
@@ -133,10 +142,6 @@ int main(){
 						//immediate can be signed
                         printf("addi \n");
                         printf("imm = : %d \n", imm_20_31_s);
-                        dec2bin(imm_20_31_s);
-                        printf("\n");
-                        dec2bin(imm_20_31);
-                        printf("\n");
 
 						reg[rd]=reg[rs1]+imm_20_31_s;
 						break;
@@ -214,9 +219,6 @@ int main(){
 					case 0b000://
 						//add
 						printf("add \n");
-						printf("funct7 %d \n", funct7);
-						dec2bin(funct7);
-						printf("\n");
 						if(funct7==0b0000000){
 							//add
 							reg[rd]=reg[rs1]+reg[rs2];
@@ -302,6 +304,11 @@ int main(){
                 unsigned int imm12 = (instr >> 31) & 0x1; // 1 bit
 
                 int offset = 0b0 + (imm4_1 << 1) + (imm10_5 << 5) + (imm11 << 11) + (imm12 << 12);
+                // is unsigned (needs to be signed for branching back)
+                offset = twoComp2Dec_12(offset); // converts to signed
+
+                // divide by 4 because of bytes -> words
+                offset = offset/4;
 
                 printf("Offset: %d \n", offset);
 
@@ -310,30 +317,35 @@ int main(){
 				 	    printf("BEQ \n");
 				 	    if(reg[rs1] == reg[rs2]){
                             // take branch
+                            pc = branch(pc, offset);
 				 	    }
 						break;
 					case 0b001: // BNE
 					    printf("BNE \n");
 					    if(reg[rs1] != reg[rs2]){
                             // take branch
+                            pc = branch(pc, offset);
 				 	    }
 						break;
 					case 0b100: // BLT
 					    printf("BLT \n");
 					    if(reg[rs1] < reg[rs2]){
                             // take branch
+                            pc = branch(pc, offset);
 				 	    }
 						break;
                     case 0b101: // BGE
                         printf("BGE \n");
                         if(reg[rs1] >= reg[rs2]){
                             // take branch
+                            pc = branch(pc, offset);
 				 	    }
 						break;
                     case 0b110: // BLTU
                         printf("BLTU \n");
                         if( (unsigned) reg[rs1] < (unsigned) reg[rs2]){
                             // take branch
+                            pc = branch(pc, offset);
 				 	    }
 						break;
                     case 0b111: // BGEU
@@ -341,6 +353,7 @@ int main(){
 						break;
 						if( (unsigned) reg[rs1] >= (unsigned) reg[rs2]){
                             // take branch
+                            pc = branch(pc, offset);
 				 	    }
 				}
 				break;
