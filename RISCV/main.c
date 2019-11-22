@@ -182,13 +182,13 @@ int main(){
 					case 0b000: //SB
 
 
-									
+
 					case 0b001://SH
 
 
 					case 0b010://SW
-				
-				
+
+
 				}
 				break;
 
@@ -239,37 +239,29 @@ int main(){
 						//srli and srai- shift right logical and arithmetic immediate
                         printf("sr__ \n");
 						//SHAMPT as rs2
+
 						if(funct7==0b0000000){ // logical
-                        printf("srli \n");
-
-				if (funct7 == 0b0100000) { //arithmetic
-					printf("srai \n");
-					//check srai (Mathen: this might require a loop for repeatedly shifting by 1)
-
-					x = reg[rs1] & 0x80000000;//accessing the first digit of the number
-					if (x == 1) {
-						for (int i = 0; i <= rs2; i++) {
-
-						dec2bin(reg[rs1]); // debug
-                        printf("\n");
-                        dec2bin(reg[rd]);
-                        printf("\n");
+                            printf("srli \n");
+                            reg[rd]=reg[rs1]<<rs2; // rs2 = shamt
 						}
 
-						if(funct7==0b0100000){ //arithmetic
-                        printf("srai \n");
-						//check srai (Mathen: this might require a loop for repeatedly shifting by 1)
-						reg[rd]=reg[rs1]>>rs2; // rs2 = shamt
-						x=reg[rs1]&0x80000000;
-						reg[rd]=reg[rs1]>>reg[rs2];
-						reg[rd]=reg[rd]|x;
+                        if (funct7 == 0b0100000) { //arithmetic
+                            printf("srai \n");
+                            //check srai (Mathen: this might require a loop for repeatedly shifting by 1)
 
-						dec2bin(reg[rs1]);
-                        printf("\n");
-                        dec2bin(reg[rd]);
-                        printf("\n");
-						}
-						break;
+                            x = reg[rs1] & 0x80000000;//accessing the first digit of the number
+
+                            if (x == 1) {
+                                for (int i = 0; i <= reg[rs2]; i++) {
+                                    reg[rd]=reg[rs1]>>1; // shift by 1
+                                    reg[rd]=reg[rd]|x; // adding ones to start
+                                }
+                            }
+                            else{
+                                reg[rd]=reg[rs1]>>reg[rs2];
+                            }
+                            }
+                        break;
 					case 0b110:
 						//ori
 						reg[rd]=reg[rs1]|imm_20_31_s;
