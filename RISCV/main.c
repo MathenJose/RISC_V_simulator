@@ -111,6 +111,7 @@ int main(){
         unsigned int imm_12_31 = (instr >> 12);
         unsigned int x = 0;
         int offset = 0;
+        int address = 0;
 
         // signed versions of the immediate
         int imm_12_31_s = twoComp2Dec_20(imm_12_31);//signed immediate
@@ -169,7 +170,7 @@ int main(){
                 // stores the pc+1 to rd
                 reg[rd] = pc;
 
-                int address = reg[rs1] + imm_20_31_s;
+                address = reg[rs1] + imm_20_31_s;
                 address = address &0b0; // set the least-significant bit of the result to zero
 
                 pc = address; // jump
@@ -179,16 +180,78 @@ int main(){
 			case 0x23: //store 0100011
                 printf("Store\n");
 				switch (funct3) {
+				    offset = rd + (funct7 >> 5); // 12bits
+                    offset = twoComp2Dec_12(offset);
+                    address = reg[rs1] + offset; // byte address
+
+                    int word_address = 0;
+                    word_address = floor(address/4); // byte to word address
+                    int s_offset = 0;
+                    unsigned int word = 0;
+
 					case 0b000: //SB
+                        s_offset = address%4; // byte offset
 
+                        unsigned int store_byte = reg[rs2] & 0xFF;
+                        word = memory[word_address]; // load word from memory
 
+                        switch (s_offset) {
+                            case 0:
+                                // shift by 3 bytes
+                                store_byte == (store_byte << 24);
+                                word = word & 0x00FFFFFF;
+                                break;
+
+                            case 1:
+                                // shift by 2 bytes
+                                store_byte == (store_byte << 16);
+                                word = word & 0xFF00FFFF;
+                                break;
+
+                            case 2:
+                                // shift by 1 byte
+                                store_byte == (store_byte << 8);
+                                word = word & 0xFFFF00FF;
+                                break;
+
+                            case 3:
+                                // shift by 0 bytes
+                                store_byte == (store_byte << 0);
+                                word = word & 0xFFFFFF00;
+                                break;
+                        }
+
+                    memory[word_address] = word & store_byte;
+
+                    break;
 
 					case 0b001://SH
+                        s_offset = address%2; // halfword offset
 
+                        unsigned int store_halfword = reg[rs2] & 0xFFFF;
+                        word = memory[word_address]; // load word from memory
+
+                        switch (s_offset) {
+                            case 0:
+                                // shift by 2 bytes
+                                store_byte == (store_byte << 16);
+                                word = word & 0x0000FFFF;
+                                break;
+
+                            case 1:
+                                // shift by 0 bytes
+                                store_byte == (store_byte << 0);
+                                word = word & 0xFFFF0000;
+                                break;
+                        }
+
+                    memory[word_address] = word & store_byte;
+
+                    break;
 
 					case 0b010://SW
-
-
+                        memory[word_address] = reg[rs2]; // save to memory
+                    break;
 				}
 				break;
 
