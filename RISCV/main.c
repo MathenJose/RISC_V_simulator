@@ -160,6 +160,11 @@ int main(){
 
                 break;
 
+			case 0x67: // JALR 1101111
+                printf("JALR\n");
+
+                break;
+
 			case 0x23: //store 0100011
                 printf("Store\n");
 				// TODO
