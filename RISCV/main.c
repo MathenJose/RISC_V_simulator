@@ -166,6 +166,14 @@ int main(){
 			case 0x67: // JALR 1101111
                 printf("JALR\n");
 
+                // stores the pc+1 to rd
+                reg[rd] = pc;
+
+                int address = reg[rs1] + imm_20_31_s;
+                address = address &0b0; // set the least-significant bit of the result to zero
+
+                pc = address; // jump
+
                 break;
 
 			case 0x23: //store 0100011
