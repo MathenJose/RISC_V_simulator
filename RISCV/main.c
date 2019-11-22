@@ -178,7 +178,18 @@ int main(){
 
 			case 0x23: //store 0100011
                 printf("Store\n");
-				// TODO
+				switch (funct3) {
+					case 0b000: //SB
+
+
+									
+					case 0b001://SH
+
+
+					case 0b010://SW
+				
+				
+				}
 				break;
 
             case 0x3: // load 0000011
@@ -231,7 +242,13 @@ int main(){
 						if(funct7==0b0000000){ // logical
                         printf("srli \n");
 
-						reg[rd]=reg[rs1]<<rs2; // rs2 = shamt
+				if (funct7 == 0b0100000) { //arithmetic
+					printf("srai \n");
+					//check srai (Mathen: this might require a loop for repeatedly shifting by 1)
+
+					x = reg[rs1] & 0x80000000;//accessing the first digit of the number
+					if (x == 1) {
+						for (int i = 0; i <= rs2; i++) {
 
 						dec2bin(reg[rs1]); // debug
                         printf("\n");
