@@ -54,7 +54,7 @@ int twoComp2Dec_12(int a){
 
 int main(){
 
-    char file_path[] = "shift.bin";
+    char file_path[] = "loop.bin";
     printf("Test file: %s \n", file_path);
 
     unsigned int memory [1000];
@@ -110,6 +110,7 @@ int main(){
         unsigned int imm_20_31 = (instr >> 20);
         unsigned int imm_12_31 = (instr >> 12);
         unsigned int x = 0;
+        int offset = 0;
 
         // signed versions of the immediate
         int imm_12_31_s = twoComp2Dec_20(imm_12_31);//signed immediate
@@ -119,6 +120,8 @@ int main(){
         // increment the pc for the next instruction
         pc ++;
 
+        // x0 should be zero always
+        reg[0] = 0;
 
         switch (opcode) {
 
@@ -138,25 +141,25 @@ int main(){
 
             case 0x6F: // JAL 1101111
                 printf("JAL\n");
-                // work out offset here
-                unsigned int imm11 = (instr >> 20) & 0x1; // 1 bit
-                unsigned int imm4_1 = (instr >> 8) & 0xF; // 4 bits
-                unsigned int imm10_5 = (instr >> 25) & 0x3F; // 6 bits
-                unsigned int imm12 = (instr >> 31) & 0x1; // 1 bit
 
-                int offset = 0b0 + (imm4_1 << 1) + (imm10_5 << 5) + (imm11 << 11) + (imm12 << 12);
-                // is unsigned (needs to be signed for branching back)
-                offset = twoComp2Dec_12(offset); // converts to signed
+                // work out offset here
+                unsigned int j_imm11 = (instr >> 20) & 0x1; // 1 bit
+                unsigned int j_imm19_12 = (instr >> 12) & 0xFF; // 8 bits
+                unsigned int j_imm10_1 = (instr >> 21) & 0x3FF; // 10 bits
+                unsigned int j_imm20 = (instr >> 31) & 0x1; // 1 bit
+
+                offset = 0b0 + (j_imm10_1 << 1) + (j_imm11 << 11) + (j_imm19_12 << 12) + (j_imm20 << 20);
+                // is unsigned (needs to be signed for jumping back)
+                offset = twoComp2Dec_20(offset); // converts to signed
 
                 // divide by 4 because of bytes -> words
                 offset = offset/4;
-
                 printf("Offset: %d \n", offset);
 
-                break;
+                // stores the pc+1 to rd
+                reg[rd] = pc;
 
-			case 0x67: // JALR 1101111
-                printf("JALR\n");
+                pc = branch(pc, offset);
 
                 break;
 
@@ -185,7 +188,7 @@ int main(){
 
 						reg[rd]=reg[rs1]+imm_20_31_s;
 						break;
-					case 0b001://***************
+					case 0b001:
 						//slli- shift left logical immediate
 						printf("slli \n");
 						reg[rd]=reg[rs1] << rs2; // rs2 = shamt
@@ -338,19 +341,17 @@ int main(){
             case 0x63: // branch 1100011
                 printf("branch \n");
                 // work out offset here
-                /*
                 unsigned int imm11 = (instr >> 7) & 0x1; // 1 bit
                 unsigned int imm4_1 = (instr >> 8) & 0xF; // 4 bits
                 unsigned int imm10_5 = (instr >> 25) & 0x3F; // 6 bits
                 unsigned int imm12 = (instr >> 31) & 0x1; // 1 bit
 
-                int offset = 0b0 + (imm4_1 << 1) + (imm10_5 << 5) + (imm11 << 11) + (imm12 << 12);
+                offset = 0b0 + (imm4_1 << 1) + (imm10_5 << 5) + (imm11 << 11) + (imm12 << 12);
                 // is unsigned (needs to be signed for branching back)
                 offset = twoComp2Dec_12(offset); // converts to signed
 
                 // divide by 4 because of bytes -> words
                 offset = offset/4;
-                */
 
                 printf("Offset: %d \n", offset);
 
