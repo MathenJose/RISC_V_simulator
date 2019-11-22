@@ -54,7 +54,7 @@ int twoComp2Dec_12(int a){
 
 int main(){
 
-    char file_path[] = "branchmany.bin";
+    char file_path[] = "loop.bin";
     printf("Test file: %s \n", file_path);
 
     unsigned int memory [1000];
@@ -116,6 +116,7 @@ int main(){
 		int imm_25_31_s = twoComp2Dec_7(imm_25_31);
         int imm_20_31_s = twoComp2Dec_12(imm_20_31);
 
+        // increment the pc for the next instruction
         pc ++;
 
 
@@ -125,13 +126,23 @@ int main(){
 				// exit:
 				if (reg[10] == 10){
                     // exits program
-                    printf("Exiting through ecall...");
+                    printf("Exiting through ecall...\n");
                     return 0; // exit main function
 				}
 				break;
 
-			case 0x23: //load and store 0100011
+            case 0x6F: // JAL 1101111
+                printf("JAL\n");
 
+                break;
+
+			case 0x23: //store 0100011
+                printf("Store\n");
+				// TODO
+				break;
+
+            case 0x3: // load 0000011
+                printf("Load\n");
 				// TODO
 				break;
 
@@ -350,11 +361,11 @@ int main(){
 						break;
                     case 0b111: // BGEU
                         printf("BGEU \n");
-						break;
 						if( (unsigned) reg[rs1] >= (unsigned) reg[rs2]){
                             // take branch
                             pc = branch(pc, offset);
 				 	    }
+				 	    break;
 				}
 				break;
 
