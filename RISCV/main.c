@@ -286,6 +286,7 @@ int main() {
 			case 0b010://LW
 				signed int load_word = address & 0xFFFFFFFF;
 				reg[rd] = load_word;//load to rd
+				
 				break;
 
 			case 0b100://LBU
