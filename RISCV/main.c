@@ -138,7 +138,7 @@ int main() {
 
 		case 0x17: // AUIPC 0010111
 			printf("AUIPC\n");
-
+            reg[rd] = imm_12_31 << 12;
 			break;
 
 		case 0x6F: // JAL 1101111
@@ -185,69 +185,66 @@ int main() {
 				offset = twoComp2Dec_12(offset);
 				address = reg[rs1] + offset; // byte address
 
-				int word_address = 0;
-				word_address = floor(address / 4); // byte to word address
+				int word_address = floor(address / 4); // byte to word address
 				int s_offset = 0;
 				unsigned int word = 0;
 
 			case 0b000: //SB
 				s_offset = address % 4; // byte offset
 
-				unsigned int store_byte = reg[rs2] & 0xFF;
+				unsigned int store_byte = reg[rs2] & 0xFF; // taking the byte from the register
 				word = memory[word_address]; // load word from memory
 
 				switch (s_offset) {
 				case 0:
 					// shift by 3 bytes
 					store_byte == (store_byte << 24);
-					word = word & 0x00FFFFFF;
+					word = word & 0x00FFFFFF; // clear the memory to be stored to
 					break;
 
 				case 1:
 					// shift by 2 bytes
 					store_byte == (store_byte << 16);
-					word = word & 0xFF00FFFF;
+					word = word & 0xFF00FFFF; // clear the memory to be stored to
 					break;
 
 				case 2:
 					// shift by 1 byte
 					store_byte == (store_byte << 8);
-					word = word & 0xFFFF00FF;
+					word = word & 0xFFFF00FF; // clear the memory to be stored to
 					break;
 
 				case 3:
 					// shift by 0 bytes
 					store_byte == (store_byte << 0);
-					word = word & 0xFFFFFF00;
+					word = word & 0xFFFFFF00; // clear the memory to be stored to
 					break;
 				}
 
-				memory[word_address] = word & store_byte;
-
+				memory[word_address] = word | store_byte; // placing the memory to be stored in the word and then to memory
 				break;
 
 			case 0b001://SH
 				s_offset = address % 2; // halfword offset
 
-				unsigned int store_halfword = reg[rs2] & 0xFFFF;
+				unsigned int store_halfword = reg[rs2] & 0xFFFF; // taking the halfword from the register
 				word = memory[word_address]; // load word from memory
 
 				switch (s_offset) {
 				case 0:
 					// shift by 2 bytes
-					store_byte == (store_byte << 16);
-					word = word & 0x0000FFFF;
+					store_halfword == (store_halfword << 16);
+					word = word & 0x0000FFFF; // clear the memory to be stored to
 					break;
 
 				case 1:
 					// shift by 0 bytes
-					store_byte == (store_byte << 0);
-					word = word & 0xFFFF0000;
+					store_halfword == (store_halfword << 0);
+					word = word & 0xFFFF0000; // clear the memory to be stored to
 					break;
 				}
 
-				memory[word_address] = word & store_byte;
-
+				memory[word_address] = word | store_halfword; // placing the memory to be stored in the word and then to memory
 				break;
 
 			case 0b010://SW
@@ -261,83 +258,26 @@ int main() {
 			// TODO
 			offset = imm_20_31;
 			address = reg[rs1] + offset;
-			int l_offset = 0;
-			unsigned int word = 0;
+
 			switch (funct3) {
 			case 0b000://LB
-				l_offset - address % 4;
-				switch (l_offset) {
-				case 0:
-					int load_byte = memory[address] & 0x000000FF;
-					//if the 8th bit is 1, sign extend.
-					if ((load_byte & 0x100) == 0x100) {
-						load_byte = (load_byte | 0xFFFFFF00); //sign extension
-						reg[rd] = load_byte;
-					}
-					else {
-						reg[rd] = load_byte;
-					}
-					break;
-				case 1:
-					int load_byte = memory[address] & 0x0000FF00;
-					//if the 16th bit is 1, sign extend.
-					if ((load_byte & 0x10000) == 0x10000) {
-						load_byte = (load_byte | 0xFFFF0000);//sign extension
-						reg[rd] = load_byte;
-					}
-					else {
-						reg[rd] = load_byte;
-					}
-					break;
-
-				case 2:
-					int load_byte = memory[address] & 0x00FF0000;
-					//if the 24th bit is 1, sign extend.
-					if ((load_byte & 0x1000000) == 0x1000000) {
-						load_byte = (load_byte | 0xFF000000);//sign extension
-						reg[rd] = load_byte;
-					}
-					else {
-						reg[rd] = load_byte;
-					}
-					break;
-				case 3:
-					int load_byte = memory[address] & 0xFF000000;
-					//if the 32th bit is 1, sign extend.
-					if ((load_byte & 0x100000000) == 0x100000000) {
-						load_byte = (load_byte | 0x00000000);//sign extension
-						reg[rd] = load_byte;
-					}
-					else {
-						reg[rd] = load_byte;
-					}
-					break;
-
+				int load_byte = memory[address] & 0x000000FF;
+				//if the 8th bit is 1, sign extend.
+				if ((load_byte & 0x80) == 0x80) {
+					load_byte = (load_byte|0xFFFFFF00);
 				}
+				reg[rd] = load_byte;
+				break;
+
 			case 0b001://LH
-				l_offset = address % 2;
-				switch (l_offset) {
-
-				case 0:
-					int load_half = memory[address] & 0x0000FFFF;
-					//if the 16th bit is 1, sign extend.
-					if (load_half & 0x8000 == 0x8000) {
-						load_half = load_half | 0xFFFF0000;
-						reg[rd] = load_half;
-					}
-					else {
-						reg[rd] = load_half;
-					}
-
-					break;
-
-				case 1:
-					int load_half = memory[address] & 0xFFFF0000;
-					//if the last 16 bits are to be uploaded, no sign extension required.
-					reg[rd] = load_half;
-
-					break;
+				int load_half = memory[address] & 0x0000FFFF;
+				//if the 16th bit is 1, sign extend.
+				if (load_half & 0x8000 == 1) {
+					(load_word |0xFFFF0000) = 1;
 				}
+				else {
+				}
+				reg[rd] = load_halfword;
 				break;
 
 			case 0b010://LW
