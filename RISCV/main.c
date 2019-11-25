@@ -138,7 +138,7 @@ int main() {
 
 		case 0x17: // AUIPC 0010111
 			printf("AUIPC\n");
-
+            reg[rd] = imm_12_31 << 12;
 			break;
 
 		case 0x6F: // JAL 1101111
@@ -185,8 +185,7 @@ int main() {
 				offset = twoComp2Dec_12(offset);
 				address = reg[rs1] + offset; // byte address
 
-				int word_address = 0;
-				word_address = floor(address / 4); // byte to word address
+				int word_address = floor(address / 4); // byte to word address
 				int s_offset = 0;
 				unsigned int word = 0;
 
@@ -222,7 +221,7 @@ int main() {
 					break;
 				}
 
-				memory[word_address] = word & store_byte;
+				memory[word_address] = word | store_byte;
 
 				break;
 
@@ -235,18 +234,18 @@ int main() {
 				switch (s_offset) {
 				case 0:
 					// shift by 2 bytes
-					store_byte == (store_byte << 16);
+					store_halfword == (store_halfword << 16);
 					word = word & 0x0000FFFF;
 					break;
 
 				case 1:
 					// shift by 0 bytes
-					store_byte == (store_byte << 0);
+					store_halfword == (store_halfword << 0);
 					word = word & 0xFFFF0000;
 					break;
 				}
 
-				memory[word_address] = word & store_byte;
+				memory[word_address] = word | store_halfword;
 
 				break;
 
