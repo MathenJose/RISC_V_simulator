@@ -261,19 +261,19 @@ int main() {
 			// TODO
 			offset = imm_20_31;
 			address = reg[rs1] + offset;
-			
+
 			switch (funct3) {
 			case 0b000://LB
-				int load_byte = address & 0x000000FF;
+				int load_byte = memory[address] & 0x000000FF;
 				//if the 8th bit is 1, sign extend.
-				if (load_byte & 0x8==1) {
-					(load_byte|0xFFFFF00) = 1;
+				if ((load_byte & 0x80) == 0x80) {
+					load_byte = (load_byte|0xFFFFFF00);
 				}
 				reg[rd] = load_byte;
 				break;
 
 			case 0b001://LH
-				int load_half = address & 0x0000FFFF;
+				int load_half = memory[address] & 0x0000FFFF;
 				//if the 16th bit is 1, sign extend.
 				if (load_half & 0x8000 == 1) {
 					(load_word |0xFFFF0000) = 1;
@@ -284,18 +284,18 @@ int main() {
 				break;
 
 			case 0b010://LW
-				signed int load_word = address & 0xFFFFFFFF;
+				int load_word = memory[address] & 0xFFFFFFFF;
 				reg[rd] = load_word;//load to rd
-				
+
 				break;
 
 			case 0b100://LBU
-				unsigned int load_byte = address & 0x000000FF;
+				unsigned int load_byte = memory[address] & 0x000000FF;
 				reg[rd] = load_byte;
 				break;
 
 			case 0b101://LHU
-				unsigned int load_halfword = address & 0x0000FFFF;
+				unsigned int load_halfword = memory[address] & 0x0000FFFF;
 				reg[rd] = load_halfword;
 				break;
 			}
