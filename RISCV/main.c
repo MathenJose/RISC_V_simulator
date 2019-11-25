@@ -192,61 +192,59 @@ int main() {
 			case 0b000: //SB
 				s_offset = address % 4; // byte offset
 
-				unsigned int store_byte = reg[rs2] & 0xFF;
+				unsigned int store_byte = reg[rs2] & 0xFF; // taking the byte from the register
 				word = memory[word_address]; // load word from memory
 
 				switch (s_offset) {
 				case 0:
 					// shift by 3 bytes
 					store_byte == (store_byte << 24);
-					word = word & 0x00FFFFFF;
+					word = word & 0x00FFFFFF; // clear the memory to be stored to
 					break;
 
 				case 1:
 					// shift by 2 bytes
 					store_byte == (store_byte << 16);
-					word = word & 0xFF00FFFF;
+					word = word & 0xFF00FFFF; // clear the memory to be stored to
 					break;
 
 				case 2:
 					// shift by 1 byte
 					store_byte == (store_byte << 8);
-					word = word & 0xFFFF00FF;
+					word = word & 0xFFFF00FF; // clear the memory to be stored to
 					break;
 
 				case 3:
 					// shift by 0 bytes
 					store_byte == (store_byte << 0);
-					word = word & 0xFFFFFF00;
+					word = word & 0xFFFFFF00; // clear the memory to be stored to
 					break;
 				}
 
-				memory[word_address] = word | store_byte;
-
+				memory[word_address] = word | store_byte; // placing the memory to be stored in the word and then to memory
 				break;
 
 			case 0b001://SH
 				s_offset = address % 2; // halfword offset
 
-				unsigned int store_halfword = reg[rs2] & 0xFFFF;
+				unsigned int store_halfword = reg[rs2] & 0xFFFF; // taking the halfword from the register
 				word = memory[word_address]; // load word from memory
 
 				switch (s_offset) {
 				case 0:
 					// shift by 2 bytes
 					store_halfword == (store_halfword << 16);
-					word = word & 0x0000FFFF;
+					word = word & 0x0000FFFF; // clear the memory to be stored to
 					break;
 
 				case 1:
 					// shift by 0 bytes
 					store_halfword == (store_halfword << 0);
-					word = word & 0xFFFF0000;
+					word = word & 0xFFFF0000; // clear the memory to be stored to
 					break;
 				}
 
-				memory[word_address] = word | store_halfword;
-
+				memory[word_address] = word | store_halfword; // placing the memory to be stored in the word and then to memory
 				break;
 
 			case 0b010://SW
