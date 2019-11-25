@@ -297,7 +297,6 @@ int main() {
 				break;
 			}
 			break;
-
 		case 0x13: //instructions with immediate 0010011
 			switch (funct3) {
 			case 0b000:
