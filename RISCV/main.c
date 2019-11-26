@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<math.h>
 
 // simulator for RISC-V
 
@@ -58,8 +59,8 @@ int main() {
 	char file_path[] = "loop.bin";
 	printf("Test file: %s \n", file_path);
 
-	unsigned int memory[1000];
-	for (int i = 0; i < 1000; i++) { // clear the memory
+	unsigned int memory[300000];
+	for (int i = 0; i < 300000; i++) { // clear the memory
 		memory[i] = 0;
 	}
 	unsigned int* memory_pointer = &memory[0]; // pointer to the memory array
@@ -113,6 +114,7 @@ int main() {
 		unsigned int x = 0;
 		int offset = 0;
 		int address = 0;
+		int word_address = 0;
 
 		// signed versions of the immediate
 		int imm_12_31_s = twoComp2Dec_20(imm_12_31);//signed immediate
@@ -126,7 +128,6 @@ int main() {
 		reg[0] = 0;
 
 		switch (opcode) {
-
 		case 0x73: // e-call
 			// exit:
 			if (reg[10] == 10) {
@@ -138,7 +139,7 @@ int main() {
 
 		case 0x17: // AUIPC 0010111
 			printf("AUIPC\n");
-            reg[rd] = imm_12_31 << 12;
+            reg[rd] = imm_12_31 + (pc-1); // rd = offset + pc
 			break;
 
 		case 0x6F: // JAL 1101111
@@ -179,17 +180,23 @@ int main() {
 			break;
 
 		case 0x23: //store 0100011
-			printf("Store\n");
+			printf("Store: \n");
+            offset = rd + (funct7 >> 5); // 12bits
+            offset = twoComp2Dec_12(offset);
+            address = reg[rs1] + offset; // byte address
+
+            printf("stack pointer: %d\n", reg[rs1]);
+            printf("offset: %d\n", offset);
+
+            word_address = floor(address / 4); // byte to word address
+            printf("word address: %d\n",word_address);
+
+            int s_offset = 0;
+            unsigned int word = 0;
+
 			switch (funct3) {
-				offset = rd + (funct7 >> 5); // 12bits
-				offset = twoComp2Dec_12(offset);
-				address = reg[rs1] + offset; // byte address
-
-				int word_address = floor(address / 4); // byte to word address
-				int s_offset = 0;
-				unsigned int word = 0;
-
 			case 0b000: //SB
+			    printf("byte\n");
 				s_offset = address % 4; // byte offset
 
 				unsigned int store_byte = reg[rs2] & 0xFF; // taking the byte from the register
@@ -198,25 +205,25 @@ int main() {
 				switch (s_offset) {
 				case 0:
 					// shift by 3 bytes
-					store_byte == (store_byte << 24);
+					store_byte = (store_byte << 24);
 					word = word & 0x00FFFFFF; // clear the memory to be stored to
 					break;
 
 				case 1:
 					// shift by 2 bytes
-					store_byte == (store_byte << 16);
+					store_byte = (store_byte << 16);
 					word = word & 0xFF00FFFF; // clear the memory to be stored to
 					break;
 
 				case 2:
 					// shift by 1 byte
-					store_byte == (store_byte << 8);
+					store_byte = (store_byte << 8);
 					word = word & 0xFFFF00FF; // clear the memory to be stored to
 					break;
 
 				case 3:
 					// shift by 0 bytes
-					store_byte == (store_byte << 0);
+					store_byte = (store_byte << 0);
 					word = word & 0xFFFFFF00; // clear the memory to be stored to
 					break;
 				}
@@ -225,6 +232,7 @@ int main() {
 				break;
 
 			case 0b001://SH
+			    printf("halfword\n");
 				s_offset = address % 2; // halfword offset
 
 				unsigned int store_halfword = reg[rs2] & 0xFFFF; // taking the halfword from the register
@@ -233,13 +241,13 @@ int main() {
 				switch (s_offset) {
 				case 0:
 					// shift by 2 bytes
-					store_halfword == (store_halfword << 16);
+					store_halfword = (store_halfword << 16);
 					word = word & 0x0000FFFF; // clear the memory to be stored to
 					break;
 
 				case 1:
 					// shift by 0 bytes
-					store_halfword == (store_halfword << 0);
+					store_halfword = (store_halfword << 0);
 					word = word & 0xFFFF0000; // clear the memory to be stored to
 					break;
 				}
@@ -248,55 +256,118 @@ int main() {
 				break;
 
 			case 0b010://SW
+			    printf("word\n");
 				memory[word_address] = reg[rs2]; // save to memory
 				break;
+
+            default:
+                printf("error...\n");
 			}
 			break;
 
 		case 0x3: // load 0000011
 			printf("Load\n");
-			// TODO
 			offset = imm_20_31;
 			address = reg[rs1] + offset;
+			printf("stack pointer: %d\n", reg[rs1]);
+            printf("offset: %d\n", offset);
+
+            word_address = floor(address / 4); // byte to word address
+			printf("word address: %d\n",word_address);
+			int l_offset = 0;
 
 			switch (funct3) {
 			case 0b000://LB
-				int load_byte = memory[address] & 0x000000FF;
-				//if the 8th bit is 1, sign extend.
-				if ((load_byte & 0x80) == 0x80) {
-					load_byte = (load_byte|0xFFFFFF00);
+			    printf("byte\n");
+				l_offset = address % 4;
+				int load_byte = 0;
+				switch (l_offset) {
+
+				case 0:
+					load_byte = memory[word_address] & 0x000000FF;
+					//if the 8th bit is 1, sign extend.
+					if ((load_byte & 0x80) == 0x80) {
+						load_byte = (load_byte | 0xFFFFFF00); //sign extension
+					}
+                    reg[rd] = load_byte;
+					break;
+
+				case 1:
+					load_byte = memory[word_address] & 0x0000FF00;
+					//if the 16th bit is 1, sign extend.
+					load_byte = load_byte >> 8;
+					if ((load_byte & 0x80) == 0x80) {
+						load_byte = (load_byte | 0xFFFFFF00); //sign extension
+					}
+					reg[rd] = load_byte;
+					break;
+
+				case 2:
+					load_byte = memory[word_address] & 0x00FF0000;
+					//if the 24th bit is 1, sign extend.
+					load_byte = load_byte >> 16;
+					if ((load_byte & 0x80) == 0x80) {
+						load_byte = (load_byte | 0xFFFFFF00); //sign extension
+					}
+					reg[rd] = load_byte;
+					break;
+
+				case 3:
+					load_byte = memory[word_address] & 0xFF000000;
+					//if the 32th bit is 1, sign extend.
+					load_byte = load_byte >> 24;
+					if ((load_byte & 0x80) == 0x80) {
+						load_byte = (load_byte | 0xFFFFFF00); //sign extension
+					}
+                    reg[rd] = load_byte;
+                    break;
 				}
-				reg[rd] = load_byte;
-				break;
 
 			case 0b001://LH
-				int load_half = memory[address] & 0x0000FFFF;
-				//if the 16th bit is 1, sign extend.
-				if (load_half & 0x8000 == 1) {
-					(load_word |0xFFFF0000) = 1;
+			    printf("halfword\n");
+				l_offset = address % 2;
+				int load_half = 0;
+				switch (l_offset) {
+
+				case 0:
+					load_half = memory[word_address] & 0x0000FFFF;
+					//if the 16th bit is 1, sign extend.
+					if ((load_half & 0x8000) == 0x8000) {
+						load_half = load_half | 0xFFFF0000;
+						reg[rd] = load_half;
+					}
+					else {
+						reg[rd] = load_half;
+					}
+
+					break;
+
+				case 1:
+					load_half = memory[word_address] & 0xFFFF0000;
+					//if the last 16 bits are to be uploaded, no sign extension required.
+					reg[rd] = load_half;
+					break;
 				}
-				else {
-				}
-				reg[rd] = load_halfword;
 				break;
 
 			case 0b010://LW
-				int load_word = memory[address] & 0xFFFFFFFF;
-				reg[rd] = load_word;//load to rd
-
+			    printf("word\n");
+				reg[rd] = memory[word_address]; //load to rd
 				break;
 
 			case 0b100://LBU
-				unsigned int load_byte = memory[address] & 0x000000FF;
-				reg[rd] = load_byte;
+			    //unsigned int load_byte_u;
+				//load_byte_u = (memory[address] & 0x000000FF);
+				//reg[rd] = load_byte_u;
 				break;
 
 			case 0b101://LHU
-				unsigned int load_halfword = memory[address] & 0x0000FFFF;
-				reg[rd] = load_halfword;
+				//unsigned int load_halfword_u = (memory[address] & 0x0000FFFF);
+				//reg[rd] = load_halfword_u;
 				break;
 			}
 			break;
+
 		case 0x13: //instructions with immediate 0010011
 			switch (funct3) {
 			case 0b000:
