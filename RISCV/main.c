@@ -56,7 +56,7 @@ int twoComp2Dec_12(int a) {
 
 int main() {
 
-	char file_path[] = "loop.bin";
+	char file_path[] = "shift.bin";
 	printf("Test file: %s \n", file_path);
 
 	unsigned int memory[300000];
@@ -139,7 +139,7 @@ int main() {
 
 		case 0x17: // AUIPC 0010111
 			printf("AUIPC\n");
-            reg[rd] = imm_12_31 + (pc-1); // rd = offset + pc
+            reg[rd] = (imm_12_31 << 12) + (pc-1); // rd = offset + pc
 			break;
 
 		case 0x6F: // JAL 1101111
@@ -181,12 +181,12 @@ int main() {
 
 		case 0x23: //store 0100011
 			printf("Store: \n");
-            offset = rd + (funct7 >> 5); // 12bits
+            offset = rd + (funct7 << 5); // 12bits
             offset = twoComp2Dec_12(offset);
             address = reg[rs1] + offset; // byte address
 
-            printf("stack pointer: %d\n", reg[rs1]);
-            printf("offset: %d\n", offset);
+            printf("stack pointer: %d   ", reg[rs1]);
+            printf("offset: %d  ", offset);
 
             word_address = floor(address / 4); // byte to word address
             printf("word address: %d\n",word_address);
@@ -268,9 +268,10 @@ int main() {
 		case 0x3: // load 0000011
 			printf("Load\n");
 			offset = imm_20_31;
+			offset = twoComp2Dec_12(offset);
 			address = reg[rs1] + offset;
-			printf("stack pointer: %d\n", reg[rs1]);
-            printf("offset: %d\n", offset);
+			printf("stack pointer: %d   ", reg[rs1]);
+            printf("offset: %d   ", offset);
 
             word_address = floor(address / 4); // byte to word address
 			printf("word address: %d\n",word_address);
@@ -380,7 +381,8 @@ int main() {
 				break;
 			case 0b001:
 				//slli- shift left logical immediate
-				printf("slli \n");
+				printf("slli   ");
+				printf("shamt: %d \n", rs2);
 				reg[rd] = reg[rs1] << rs2; // rs2 = shamt
 				break;
 			case 0b010:
@@ -412,18 +414,18 @@ int main() {
 				//SHAMPT as rs2
 
 				if (funct7 == 0b0000000) { // logical
-					printf("srli \n");
-					reg[rd] = reg[rs1] << rs2; // rs2 = shamt
+					printf("srli  ");
+					printf("shamt: %d \n", rs2);
+					reg[rd] = reg[rs1] >> rs2; // rs2 = shamt
 				}
 
 				if (funct7 == 0b0100000) { //arithmetic
-					printf("srai \n");
-					//check srai (Mathen: this might require a loop for repeatedly shifting by 1)
-
+					printf("srai   ");
+					printf("shamt: %d \n", rs2);
 					x = reg[rs1] & 0x80000000;//accessing the first digit of the number
 
-					if (x == 1) {
-						for (int i = 0; i <= reg[rs2]; i++) {
+					if (x == 0x80000000) {
+						for (int i = 0; i < rs2; i++) {
 							reg[rd] = reg[rs1] >> 1; // shift by 1
 							reg[rd] = reg[rd] | x; // adding ones to start
 						}
