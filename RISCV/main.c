@@ -56,7 +56,7 @@ int twoComp2Dec_12(int a) {
 
 int main() {
 
-	char file_path[] = "shift.bin";
+	char file_path[] = "loop.bin";
 	printf("Test file: %s \n", file_path);
 
 	unsigned int memory[300000];
@@ -410,23 +410,29 @@ int main() {
 
 			case 0b101://******************
 				//srli and srai- shift right logical and arithmetic immediate
-				printf("sr__ \n");
 				//SHAMPT as rs2
 
 				if (funct7 == 0b0000000) { // logical
 					printf("srli  ");
 					printf("shamt: %d \n", rs2);
-					reg[rd] = reg[rs1] >> rs2; // rs2 = shamt
+					reg[rd] = reg[rs1];
+					for (int i = 0; i < rs2; i++) {
+                        reg[rd] = reg[rd] >> 1; // shift by 1
+                        x = reg[rd] & 0x80000000;
+                        if (x == 0x80000000) {
+                            reg[rd] = reg[rd] & 0x7fffffff;
+                        }
+                    }
 				}
 
 				if (funct7 == 0b0100000) { //arithmetic
 					printf("srai   ");
 					printf("shamt: %d \n", rs2);
 					x = reg[rs1] & 0x80000000;//accessing the first digit of the number
-
+                    reg[rd] = reg[rs1];
 					if (x == 0x80000000) {
 						for (int i = 0; i < rs2; i++) {
-							reg[rd] = reg[rs1] >> 1; // shift by 1
+							reg[rd] = reg[rd] >> 1; // shift by 1
 							reg[rd] = reg[rd] | x; // adding ones to start
 						}
 					}
