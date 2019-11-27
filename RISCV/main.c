@@ -56,7 +56,7 @@ int twoComp2Dec_12(int a) {
 
 int main() {
 
-	char file_path[] = "test_srai.bin";
+	char file_path[] = "branchmany.bin";
 	printf("Test file: %s \n", file_path);
 
 	unsigned int memory[300000];
@@ -323,10 +323,11 @@ int main() {
                     reg[rd] = load_byte;
                     break;
 				}
+				break;
 
 			case 0b001://LH
 			    printf("halfword\n");
-				l_offset = address % 2;
+				l_offset = address % 4;
 				int load_half = 0;
 				switch (l_offset) {
 
@@ -335,16 +336,24 @@ int main() {
 					//if the 16th bit is 1, sign extend.
 					if ((load_half & 0x8000) == 0x8000) {
 						load_half = load_half | 0xFFFF0000;
-						reg[rd] = load_half;
 					}
-					else {
-						reg[rd] = load_half;
-					}
+                    reg[rd] = load_half;
 
 					break;
 
-				case 1:
+                case 1:
+					load_half = memory[word_address] & 0x00FFFF00;
+					//if the 24th bit is 1, sign extend.
+					if ((load_half & 0x800000) == 0x800000) {
+						load_half = load_half | 0xFF000000;
+					}
+					load_half = load_half >> 8;
+					reg[rd] = load_half;
+                    break;
+
+				case 2:
 					load_half = memory[word_address] & 0xFFFF0000;
+					load_half = load_half >> 16;
 					//if the last 16 bits are to be uploaded, no sign extension required.
 					reg[rd] = load_half;
 					break;
