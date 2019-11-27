@@ -56,7 +56,7 @@ int twoComp2Dec_12(int a) {
 
 int main() {
 
-	char file_path[] = "loop.bin";
+	char file_path[] = "test_srai.bin";
 	printf("Test file: %s \n", file_path);
 
 	unsigned int memory[300000];
@@ -434,10 +434,12 @@ int main() {
 						for (int i = 0; i < rs2; i++) {
 							reg[rd] = reg[rd] >> 1; // shift by 1
 							reg[rd] = reg[rd] | x; // adding ones to start
+							dec2bin(reg[rd]);
+							printf("\n");
 						}
 					}
 					else {
-						reg[rd] = reg[rs1] >> reg[rs2];
+						reg[rd] = reg[rs1] >> rs2;
 					}
 				}
 				break;
