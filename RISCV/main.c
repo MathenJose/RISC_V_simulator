@@ -56,7 +56,7 @@ int twoComp2Dec_12(int a) {
 
 int main() {
 
-	char file_path[] = "branchmany.bin";
+	char file_path[] = "loop.bin";
 	printf("Test file: %s \n", file_path);
 
 	unsigned int memory[300000];
@@ -163,7 +163,6 @@ int main() {
 			reg[rd] = pc;
 
 			pc = branch(pc, offset);
-
 			break;
 
 		case 0x67: // JALR 1101111
@@ -176,7 +175,6 @@ int main() {
 			address = address & 0b0; // set the least-significant bit of the result to zero
 
 			pc = address; // jump
-
 			break;
 
 		case 0x23: //store 0100011
@@ -388,12 +386,14 @@ int main() {
 
 				reg[rd] = reg[rs1] + imm_20_31_s;
 				break;
+
 			case 0b001:
 				//slli- shift left logical immediate
 				printf("slli   ");
 				printf("shamt: %d \n", rs2);
 				reg[rd] = reg[rs1] << rs2; // rs2 = shamt
 				break;
+
 			case 0b010:
 				//slti- set less than immediate
 				if (reg[rs1] < imm_20_31_s) {
@@ -403,6 +403,7 @@ int main() {
 					reg[rd] = 0;
 				}
 				break;
+
 			case 0b011:
 				//sltiu-set less than immediate unsigned
 				//*****************
@@ -413,9 +414,11 @@ int main() {
 					reg[rd] = 0;
 				}
 				break;
+
 			case 0b100:
 				//xori
 				reg[rd] = reg[rs1] ^ imm_20_31_s;
+				break;
 
 			case 0b101://******************
 				//srli and srai- shift right logical and arithmetic immediate
@@ -452,13 +455,17 @@ int main() {
 					}
 				}
 				break;
+
 			case 0b110:
 				//ori
+				printf("ori\n");
 				reg[rd] = reg[rs1] | imm_20_31_s;
+				break;
 
 			case 0b111:
 				//andi
 				reg[rd] = reg[rs1] & imm_20_31_s;
+				break;
 			default:
 				printf("ERROR funct3 not recognised... \n");
 			}

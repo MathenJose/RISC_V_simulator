@@ -56,7 +56,7 @@ int twoComp2Dec_12(int a) {
 
 int main() {
 
-	char file_path[] = "loop.bin";
+	char file_path[] = "test_random1.bin";
 	printf("Test file: %s \n", file_path);
 
 	unsigned int memory[300000];
@@ -139,7 +139,7 @@ int main() {
 
 		case 0x17: // AUIPC 0010111
 			printf("AUIPC\n");
-            reg[rd] = imm_12_31 + (pc-1); // rd = offset + pc
+            reg[rd] = (imm_12_31 << 12) + (pc-1); // rd = offset + pc
 			break;
 
 		case 0x6F: // JAL 1101111
@@ -181,12 +181,12 @@ int main() {
 
 		case 0x23: //store 0100011
 			printf("Store: \n");
-            offset = rd + (funct7 >> 5); // 12bits
+            offset = rd + (funct7 << 5); // 12bits
             offset = twoComp2Dec_12(offset);
             address = reg[rs1] + offset; // byte address
 
-            printf("stack pointer: %d\n", reg[rs1]);
-            printf("offset: %d\n", offset);
+            printf("stack pointer: %d   ", reg[rs1]);
+            printf("offset: %d  ", offset);
 
             word_address = floor(address / 4); // byte to word address
             printf("word address: %d\n",word_address);
@@ -268,12 +268,13 @@ int main() {
 		case 0x3: // load 0000011
 			printf("Load\n");
 			offset = imm_20_31;
+			offset = twoComp2Dec_12(offset);
 			address = reg[rs1] + offset;
-			printf("stack pointer: %d\n", reg[rs1]);
-            printf("offset: %d\n", offset);
+			printf("stack pointer: %d   ", reg[rs1]);
+            printf("offset: %d   ", offset);
 
             word_address = floor(address / 4); // byte to word address
-			printf("address: %d\n",word_address);
+			printf("word address: %d\n",word_address);
 			int l_offset = 0;
 
 			switch (funct3) {
@@ -284,7 +285,7 @@ int main() {
 				switch (l_offset) {
 
 				case 0:
-					load_byte = memory[address] & 0x000000FF;
+					load_byte = memory[word_address] & 0x000000FF;
 					//if the 8th bit is 1, sign extend.
 					if ((load_byte & 0x80) == 0x80) {
 						load_byte = (load_byte | 0xFFFFFF00); //sign extension
@@ -293,7 +294,7 @@ int main() {
 					break;
 
 				case 1:
-					load_byte = memory[address] & 0x0000FF00;
+					load_byte = memory[word_address] & 0x0000FF00;
 					//if the 16th bit is 1, sign extend.
 					load_byte = load_byte >> 8;
 					if ((load_byte & 0x80) == 0x80) {
@@ -303,7 +304,7 @@ int main() {
 					break;
 
 				case 2:
-					load_byte = memory[address] & 0x00FF0000;
+					load_byte = memory[word_address] & 0x00FF0000;
 					//if the 24th bit is 1, sign extend.
 					load_byte = load_byte >> 16;
 					if ((load_byte & 0x80) == 0x80) {
@@ -313,7 +314,7 @@ int main() {
 					break;
 
 				case 3:
-					load_byte = memory[address] & 0xFF000000;
+					load_byte = memory[word_address] & 0xFF000000;
 					//if the 32th bit is 1, sign extend.
 					load_byte = load_byte >> 24;
 					if ((load_byte & 0x80) == 0x80) {
@@ -322,28 +323,37 @@ int main() {
                     reg[rd] = load_byte;
                     break;
 				}
+				break;
 
 			case 0b001://LH
 			    printf("halfword\n");
-				l_offset = address % 2;
+				l_offset = address % 4;
 				int load_half = 0;
 				switch (l_offset) {
 
 				case 0:
-					load_half = memory[address] & 0x0000FFFF;
+					load_half = memory[word_address] & 0x0000FFFF;
 					//if the 16th bit is 1, sign extend.
 					if ((load_half & 0x8000) == 0x8000) {
 						load_half = load_half | 0xFFFF0000;
-						reg[rd] = load_half;
 					}
-					else {
-						reg[rd] = load_half;
-					}
+                    reg[rd] = load_half;
 
 					break;
 
-				case 1:
-					load_half = memory[address] & 0xFFFF0000;
+                case 1:
+					load_half = memory[word_address] & 0x00FFFF00;
+					//if the 24th bit is 1, sign extend.
+					if ((load_half & 0x800000) == 0x800000) {
+						load_half = load_half | 0xFF000000;
+					}
+					load_half = load_half >> 8;
+					reg[rd] = load_half;
+                    break;
+
+				case 2:
+					load_half = memory[word_address] & 0xFFFF0000;
+					load_half = load_half >> 16;
 					//if the last 16 bits are to be uploaded, no sign extension required.
 					reg[rd] = load_half;
 					break;
@@ -352,7 +362,7 @@ int main() {
 
 			case 0b010://LW
 			    printf("word\n");
-				reg[rd] = memory[address]; //load to rd
+				reg[rd] = memory[word_address]; //load to rd
 				break;
 
 			case 0b100://LBU
@@ -378,11 +388,14 @@ int main() {
 
 				reg[rd] = reg[rs1] + imm_20_31_s;
 				break;
+
 			case 0b001:
 				//slli- shift left logical immediate
-				printf("slli \n");
+				printf("slli   ");
+				printf("shamt: %d \n", rs2);
 				reg[rd] = reg[rs1] << rs2; // rs2 = shamt
 				break;
+
 			case 0b010:
 				//slti- set less than immediate
 				if (reg[rs1] < imm_20_31_s) {
@@ -392,6 +405,7 @@ int main() {
 					reg[rd] = 0;
 				}
 				break;
+
 			case 0b011:
 				//sltiu-set less than immediate unsigned
 				//*****************
@@ -402,44 +416,58 @@ int main() {
 					reg[rd] = 0;
 				}
 				break;
+
 			case 0b100:
 				//xori
 				reg[rd] = reg[rs1] ^ imm_20_31_s;
+				break;
 
 			case 0b101://******************
 				//srli and srai- shift right logical and arithmetic immediate
-				printf("sr__ \n");
 				//SHAMPT as rs2
 
 				if (funct7 == 0b0000000) { // logical
-					printf("srli \n");
-					reg[rd] = reg[rs1] << rs2; // rs2 = shamt
+					printf("srli  ");
+					printf("shamt: %d \n", rs2);
+					reg[rd] = reg[rs1];
+					for (int i = 0; i < rs2; i++) {
+                        reg[rd] = reg[rd] >> 1; // shift by 1
+                        x = reg[rd] & 0x80000000;
+                        if (x == 0x80000000) {
+                            reg[rd] = reg[rd] & 0x7fffffff;
+                        }
+                    }
 				}
 
 				if (funct7 == 0b0100000) { //arithmetic
-					printf("srai \n");
-					//check srai (Mathen: this might require a loop for repeatedly shifting by 1)
-
+					printf("srai   ");
+					printf("shamt: %d \n", rs2);
 					x = reg[rs1] & 0x80000000;//accessing the first digit of the number
-
-					if (x == 1) {
-						for (int i = 0; i <= reg[rs2]; i++) {
-							reg[rd] = reg[rs1] >> 1; // shift by 1
+                    reg[rd] = reg[rs1];
+					if (x == 0x80000000) {
+						for (int i = 0; i < rs2; i++) {
+							reg[rd] = reg[rd] >> 1; // shift by 1
 							reg[rd] = reg[rd] | x; // adding ones to start
+							dec2bin(reg[rd]);
+							printf("\n");
 						}
 					}
 					else {
-						reg[rd] = reg[rs1] >> reg[rs2];
+						reg[rd] = reg[rs1] >> rs2;
 					}
 				}
 				break;
+
 			case 0b110:
 				//ori
+				printf("ori\n");
 				reg[rd] = reg[rs1] | imm_20_31_s;
+				break;
 
 			case 0b111:
 				//andi
 				reg[rd] = reg[rs1] & imm_20_31_s;
+				break;
 			default:
 				printf("ERROR funct3 not recognised... \n");
 			}
