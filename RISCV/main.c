@@ -160,7 +160,7 @@ int main() {
 			printf("Offset: %d \n", offset);
 
 			// stores the pc+1 to rd
-			reg[rd] = pc;
+			reg[rd] = pc*4;
 
 			pc = branch(pc, offset);
 			break;
@@ -169,10 +169,12 @@ int main() {
 			printf("JALR\n");
 
 			// stores the pc+1 to rd
-			reg[rd] = pc;
+			reg[rd] = pc*4;
 
-			address = reg[rs1] + imm_20_31_s;
-			address = address & 0b0; // set the least-significant bit of the result to zero
+			address = floor((reg[rs1] + imm_20_31_s)/4);
+			printf("Address register: %d Address byte offset: %d Address: %d\n",reg[rs1],imm_20_31_s, address);
+			address = address & 0xFFFFFFFE; // set the least-significant bit of the result to zero
+            printf("Jumping to %d \n", address);
 
 			pc = address; // jump
 			break;
@@ -502,7 +504,6 @@ int main() {
 				break;
 			case 0b011:
 				//sltu-unsigned
-				//*****************
 
 				if (reg[rs1] < reg[rs2]) {
 					reg[rd] = 1;
