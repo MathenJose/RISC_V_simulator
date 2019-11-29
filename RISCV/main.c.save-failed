@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<math.h>
+#include<string.h>
 
 // simulator for RISC-V
 
@@ -54,9 +55,31 @@ int twoComp2Dec_12(int a) {
 	return (0x800 & a ? (int)(0x7FF & a) - 0x800 : a);
 }
 
+void outputFile(char output_file[], int* reg_pointer){
+	FILE *write_ptr;
+    write_ptr = fopen(output_file,"wb");  // w for write, b for binary
+    for(int i = 0; i < 32; i++){
+        fwrite(reg_pointer,sizeof(int),1,write_ptr);
+        reg_pointer++;
+    }
+    if (!write_ptr) {
+		printf("Unable to open file!");
+		return 1;
+    }
+    printf("Output to file complete.\n");
+}
+
 int main() {
 
-	char file_path[] = "test_random1.bin";
+	char file_path[80] = "loop";
+    char input_file[80];
+    strcpy(input_file, file_path);
+    strcat(input_file, ".bin");
+
+    char output_file[80];
+    strcpy(output_file, file_path);
+    strcat(output_file, ".res");
+
 	printf("Test file: %s \n", file_path);
 
 	unsigned int memory[300000];
@@ -70,9 +93,11 @@ int main() {
 		reg[i] = 0;
 	}
 
+	int* reg_pointer = &reg[0];
+
 	FILE* ptr_myfile;
 
-	ptr_myfile = fopen(file_path, "rb");
+	ptr_myfile = fopen(input_file, "rb");
 	if (!ptr_myfile) {
 		printf("Unable to open file!");
 		return 1;
@@ -84,7 +109,7 @@ int main() {
 	int word_counter = 0;
 
 	while (fread(memory_pointer, sizeof(int), 1, ptr_myfile)) {
-		dec2bin(*memory_pointer);
+		dec2bin(*memory_pointer); //prints the binary instructions
 		printf("\n");
 		word_counter++;
 		memory_pointer++;
@@ -133,6 +158,7 @@ int main() {
 			if (reg[10] == 10) {
 				// exits program
 				printf("Exiting through ecall...\n");
+				outputFile(output_file, reg_pointer);
 				return 0; // exit main function
 			}
 			break;
@@ -160,23 +186,23 @@ int main() {
 			printf("Offset: %d \n", offset);
 
 			// stores the pc+1 to rd
-			reg[rd] = pc;
+			reg[rd] = pc*4;
 
 			pc = branch(pc, offset);
-
 			break;
 
 		case 0x67: // JALR 1101111
 			printf("JALR\n");
 
 			// stores the pc+1 to rd
-			reg[rd] = pc;
+			reg[rd] = pc*4;
 
-			address = reg[rs1] + imm_20_31_s;
-			address = address & 0b0; // set the least-significant bit of the result to zero
+			address = floor((reg[rs1] + imm_20_31_s)/4);
+			printf("Address register: %d Address byte offset: %d Address: %d\n",reg[rs1],imm_20_31_s, address);
+			address = address & 0xFFFFFFFE; // set the least-significant bit of the result to zero
+            printf("Jumping to %d \n", address);
 
 			pc = address; // jump
-
 			break;
 
 		case 0x23: //store 0100011
@@ -196,7 +222,6 @@ int main() {
 
 			switch (funct3) {
 			case 0b000: //SB
-			    printf("byte\n");
 				s_offset = address % 4; // byte offset
 
 				unsigned int store_byte = reg[rs2] & 0xFF; // taking the byte from the register
@@ -232,7 +257,6 @@ int main() {
 				break;
 
 			case 0b001://SH
-			    printf("halfword\n");
 				s_offset = address % 2; // halfword offset
 
 				unsigned int store_halfword = reg[rs2] & 0xFFFF; // taking the halfword from the register
@@ -256,7 +280,6 @@ int main() {
 				break;
 
 			case 0b010://SW
-			    printf("word\n");
 				memory[word_address] = reg[rs2]; // save to memory
 				break;
 
@@ -279,7 +302,6 @@ int main() {
 
 			switch (funct3) {
 			case 0b000://LB
-			    printf("byte\n");
 				l_offset = address % 4;
 				int load_byte = 0;
 				switch (l_offset) {
@@ -326,7 +348,6 @@ int main() {
 				break;
 
 			case 0b001://LH
-			    printf("halfword\n");
 				l_offset = address % 4;
 				int load_half = 0;
 				switch (l_offset) {
@@ -361,7 +382,6 @@ int main() {
 				break;
 
 			case 0b010://LW
-			    printf("word\n");
 				reg[rd] = memory[word_address]; //load to rd
 				break;
 
@@ -398,6 +418,7 @@ int main() {
 
 			case 0b010:
 				//slti- set less than immediate
+				printf("slti\n");
 				if (reg[rs1] < imm_20_31_s) {
 					reg[rd] = 1;
 				}
@@ -408,7 +429,7 @@ int main() {
 
 			case 0b011:
 				//sltiu-set less than immediate unsigned
-				//*****************
+				printf("sltiu\n");
 				if (reg[rs1] > imm_20_31) {
 					reg[rd] = 1;
 				}
@@ -419,10 +440,11 @@ int main() {
 
 			case 0b100:
 				//xori
+				printf("xori\n");
 				reg[rd] = reg[rs1] ^ imm_20_31_s;
 				break;
 
-			case 0b101://******************
+			case 0b101:
 				//srli and srai- shift right logical and arithmetic immediate
 				//SHAMPT as rs2
 
@@ -466,6 +488,7 @@ int main() {
 
 			case 0b111:
 				//andi
+				printf("andi\n");
 				reg[rd] = reg[rs1] & imm_20_31_s;
 				break;
 			default:
@@ -475,26 +498,28 @@ int main() {
 
 		case 0x33: // 0110011
 			switch (funct3) {
-			case 0b000://
-				//add
-				printf("add \n");
+			case 0b000:
 				if (funct7 == 0b0000000) {
 					//add
+					printf("add \n");
 					reg[rd] = reg[rs1] + reg[rs2];
 				}
 				if (funct7 == 0b0100000) {
 					//sub
+					printf("sub \n");
 					reg[rd] = reg[rs1] - reg[rs2];
 				}
 				break;
 			case 0b001:
 				//sll
 				//shift left logical-unsigned
+				printf("sll \n");
 				reg[rd] = reg[rs1] << reg[rs2]; // FIX
 				break;
 			case 0b010:
 				//slt-set less than. slt rd, rs1, rs2.
 				//rd is 1 if rs1<rs2
+				printf("slt \n");
 				if (reg[rs1] < reg[rs2]) {
 					reg[rd] = 1;
 				}
@@ -504,8 +529,7 @@ int main() {
 				break;
 			case 0b011:
 				//sltu-unsigned
-				//*****************
-
+                printf("sltu \n");
 				if (reg[rs1] < reg[rs2]) {
 					reg[rd] = 1;
 				}
@@ -515,6 +539,7 @@ int main() {
 				break;
 			case 0b100:
 				//xor
+				printf("xor \n");
 				reg[rd] = reg[rs1] ^ reg[rs2];
 				break;
 
@@ -624,5 +649,7 @@ int main() {
 
 		printReg(reg);
 	}
+	printf("End of instructions.\n");
+	outputFile(output_file, reg_pointer);
 	return 0;
 }

@@ -1,5 +1,6 @@
 # depslib dependency file v1.0
-1575030858 source:c:\users\mjos0003\desktop\02155 comparch\risc_v_simulator\riscv\main.c
+1575036780 source:c:\users\mjos0003\desktop\02155 comparch\risc_v_simulator\riscv\main.c
 	<stdio.h>
 	<math.h>
+	<string.h>
 
